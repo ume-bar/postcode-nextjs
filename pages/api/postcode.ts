@@ -2,7 +2,7 @@ import { Sequelize, Model, DataTypes } from 'sequelize';
 
 //const sequelize = new Sequelize('postgres://user:pass@example.com:5432/dbname') // Example for postgres
 const sequelize = new Sequelize({
-  database: 'postcode',
+  database: 'address',
   username: 'umehara',
   password: null,
   dialect: 'postgres',
@@ -12,24 +12,23 @@ const sequelize = new Sequelize({
 });
 
 
-class User extends Model {}
-User.init({
-  username: DataTypes.STRING,
-  birthday: DataTypes.DATE
-}, { sequelize, modelName: 'user' });
+class Address extends Model {}
+Address.init({
+  post: {type:DataTypes.STRING,primaryKey:true},
+  prefectures: DataTypes.STRING,
+  municipalities: DataTypes.STRING,
+  address: DataTypes.STRING
+}, { sequelize, modelName: 'address',freezeTableName:true,timestamps:false });
 
 export default async(req, res) => {
   await sequelize.sync();
-  if (0 === await User.count()){
-    await User.create({
-      username: 'umehara',
-      birthday: new Date(1982, 9, 14)
-    })
-  }
-  const users = await User.findAll({
-    //where: {
-    //  username: 'umehara',
-    //}
+  console.log(await Address.count());
+  
+  const address = await Address.findOne({
+    where: {
+     post: req.query['post'],
+    }
   });
-  res.status(200).send(JSON.stringify(users.map((user)=>user)))
+console.log(address)
+  res.status(200).send(JSON.stringify(address))
 }
